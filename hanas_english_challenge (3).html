@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hana's English Challenge</title>
+<style>
+:root{--blue:#4388e8;--green:#16834a;--pink:#ffedf5;--ink:#263247}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;background:linear-gradient(135deg,#e9f5ff,#fff0f6);color:var(--ink);padding:18px}
+.wrap{max-width:760px;margin:auto}.card{background:#fff;border-radius:24px;padding:24px;box-shadow:0 12px 35px #243b531a;margin:12px 0}
+h1,h2,p{text-align:center}h1{color:#5b4bca;margin-top:8px} .hero{font-size:60px;text-align:center}
+.details{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:22px 0}.detail{background:#f4f7ff;border-radius:14px;padding:13px}.detail small{display:block;color:#69758b;margin-bottom:5px}
+button{font-size:16px;border:0;border-radius:13px;padding:14px 18px;cursor:pointer;font-weight:700}
+.primary{background:var(--blue);color:white;width:100%;margin-top:12px}.secondary{background:#edf2fa;color:#334155}
+.progress{height:9px;background:#e6eaf0;border-radius:99px;overflow:hidden;margin:12px 0 20px}.bar{height:100%;background:#31b875;width:0;transition:width .2s}
+.pill{display:inline-block;background:#f0eaff;color:#6847bc;padding:7px 12px;border-radius:99px;font-size:13px;font-weight:bold}
+.question{font-size:23px;line-height:1.35;margin:20px 0}.opts{display:grid;gap:10px}.opt{width:100%;text-align:left;background:#f7f9fc;border:2px solid #e1e7f0;color:#263247}.opt.selected{border-color:var(--blue);background:#eaf2ff}.opt.correct{border-color:#22a06b;background:#e3f8e9}.opt.wrong{border-color:#df5656;background:#fff0f0}
+.feedback{border-radius:13px;padding:14px;background:#f3f6fa;margin-top:15px}.row{display:flex;gap:10px;margin-top:15px}.row button{flex:1}.hidden{display:none!important}.muted{color:#6b7280;text-align:center;font-size:14px}.score{font-size:44px;font-weight:800;color:#16834a;text-align:center}
+@media(max-width:480px){body{padding:10px}.card{padding:18px}.details{grid-template-columns:1fr}.question{font-size:21px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<section id="intro" class="card">
+<div class="hero">🌈📚⭐</div><h1>Hana's English Challenge!</h1>
+<p>Let's learn, play, and shine!</p>
+<div class="details">
+<div class="detail"><small>Name</small><strong>Hana Mohamed Sobhy</strong></div>
+<div class="detail"><small>Class</small><strong>Ocean</strong></div>
+<div class="detail"><small>Grade</small><strong>Grade 2</strong></div>
+<div class="detail"><small>School</small><strong>Sunrise Language School</strong></div>
+</div>
+<p><strong>40 questions · 40 points</strong></p>
+<p class="muted">Choose an answer and press “Check Answer” to see instant feedback. Your final score will appear at the end.</p>
+<button class="primary" onclick="startQuiz()">Start the Test 🚀</button>
+</section>
+<section id="quiz" class="card hidden">
+<div style="display:flex;justify-content:space-between;gap:12px;align-items:center"><strong id="counter">Question 1 of 40</strong><strong>⭐ <span id="scoreNow">0</span></strong></div>
+<div class="progress"><div class="bar" id="bar"></div></div>
+<span class="pill" id="section">Food vocabulary</span>
+<div class="question" id="question"></div>
+<div class="opts" id="opts"></div>
+<div id="feedback" class="feedback hidden" aria-live="polite"></div>
+<div class="row"><button class="secondary" id="prev" onclick="move(-1)">← Previous</button><button class="primary" id="check" onclick="checkAnswer()">Check Answer ✓</button><button class="primary hidden" id="next" onclick="move(1)">Next Question →</button></div>
+<p class="muted">You can go back and review your answers.</p>
+</section>
+<section id="result" class="card hidden">
+<div class="hero">🏆🎉🌟</div><h1>Well Done, Hana!</h1><p>Your final result</p><div class="score" id="finalScore"></div><h2 id="message"></h2><p id="percent"></p>
+<button class="primary" onclick="restart()">Try Again 🔄</button>
+<button class="secondary" style="width:100%;margin-top:10px" onclick="copyResult()">Copy Result</button>
+</section>
+</div>
+<script>
+const qs = [
+["Food vocabulary","Choose the correct word for 🍚",["Rice","Chips","Cereal"],0],
+["Food vocabulary","What is this? 🥔",["Carrots","Potatoes","Peppers"],1],
+["Food vocabulary","Choose the correct word for 🥕",["Beans","Peas","Carrots"],2],
+["Food vocabulary","What is this? 🍗",["Chicken","Yogurt","Cereal"],0],
+["Food vocabulary","Which word means فلفل?",["Cucumbers","Peppers","Potatoes"],1],
+["Food vocabulary","Choose the correct word for 🥒",["Cucumbers","Beans","Rice"],0],
+["Food vocabulary","What is this? 🥪",["Chips","Sandwiches","Meatballs"],1],
+["Food vocabulary","Choose the correct word for 🥣",["Shorts","Cereal","Trainers"],1],
+["Have got / Has got","I ___ got football boots.",["has","have","am"],1],
+["Have got / Has got","She ___ got a lunch box.",["have","has","are"],1],
+["Have got / Has got","___ you got a pencil case?",["Has","Are","Have"],2],
+["Have got / Has got","Has he got a sports bag?",["Yes, he has.","Yes, he have.","Yes, he is."],0],
+["Have got / Has got","Choose the correct sentence.",["I has got a folder.","I have got a folder.","I is got a folder."],1],
+["Have got / Has got","They ___ got five players.",["has","is","have"],2],
+["Have got / Has got","Choose the correct negative sentence.",["She haven't got a pen.","She hasn't got a pen.","She don't has a pen."],1],
+["Pronouns","The boys are washing ___ hands.",["our","their","his"],1],
+["Pronouns","We live here. This is ___ house.",["their","our","his"],1],
+["Pronouns","They have got ___ books.",["our","their","her"],1],
+["Pronouns","Choose the correct sentence.",["These are our books.","These is our books.","This are our books."],0],
+["Likes and dislikes","Complete: I ___ yogurt.",["likes","like","liking"],1],
+["Likes and dislikes","She ___ chicken.",["like","likes","liking"],1],
+["Likes and dislikes","I don't ___ carrots.",["likes","like","liking"],1],
+["Likes and dislikes","Does he like rice?",["Yes, he does.","Yes, he do.","Yes, he likes."],0],
+["Likes and dislikes","Do you like peppers?",["Yes, I does.","Yes, I do.","Yes, I am."],1],
+["Likes and dislikes","Choose the correct question.",["Does she like cereal?","Do she likes cereal?","Does she likes cereal?"],0],
+["Likes and dislikes","Choose the correct negative sentence.",["He don't like chips.","He doesn't likes chips.","He doesn't like chips."],2],
+["Sentence order","Put the words in order: (you / Do / like / salad?)",["Do you like salad?","You do like salad?","Like do you salad?"],0],
+["Sentence order","Put the words in order: (he / Does / like / rice?)",["He does like rice?","Does he like rice?","Does like he rice?"],1],
+["Sentence order","Put the words in order: (I / don't / like / chips.)",["I don't like chips.","Don't I chips like.","I like don't chips."],0],
+["Sentence order","Put the words in order: (She / has / got / a lunch box.)",["Has she got a lunch box.","She got has a lunch box.","She has got a lunch box."],2],
+["Sentence order","Put the words in order: (Have / you / got / a sandwich?)",["Have you got a sandwich?","You have got a sandwich?","Have got you a sandwich?"],0],
+["Punctuation","Choose the correct punctuation: do you like chicken",["Do you like chicken.","Do you like chicken?","do you like chicken!"],1],
+["Punctuation","Choose the correct sentence.",["Salma doesn't like rice.","salma doesn't like rice","Salma doesn't like rice"],0],
+["Reading comprehension","Lucy has got football boots. True or false: Lucy has got football boots.",["True","False"],0],
+["Reading comprehension","Lucy doesn't have a football shirt. True or false: Lucy has got a football shirt.",["True","False"],1],
+["Reading comprehension","In the story, how many players are in the group?",["Three","Five","Seven"],1],
+["Reading comprehension","We eat chicken and rice for ___.",["breakfast","lunch","bedtime"],1],
+["Reading comprehension","My brother likes ___ with pasta.",["meatballs","carrots","yogurt"],0],
+["Reading comprehension","Food gives us energy to ___.",["sleep all day","play","write only"],1]
+];
+let order=[],pos=0,answers={},graded={};
+function startQuiz(){order=qs.map((_,i)=>i);pos=0;answers={};graded={};document.getElementById('intro').classList.add('hidden');document.getElementById('result').classList.add('hidden');document.getElementById('quiz').classList.remove('hidden');render()}
+function render(){
+let q=qs[order[pos]],id=order[pos];document.getElementById('counter').textContent=`Question ${pos+1} of ${qs.length}`;document.getElementById('scoreNow').textContent=order.reduce((s,k)=>s+(graded[k]&&answers[k]===qs[k][3]?1:0),0);document.getElementById('bar').style.width=((pos+1)/qs.length*100)+'%';document.getElementById('section').textContent=q[0];document.getElementById('question').textContent=q[1];
+let opts=document.getElementById('opts');opts.innerHTML='';q[2].forEach((v,j)=>{let b=document.createElement('button');b.className='opt';b.textContent=String.fromCharCode(65+j)+'. '+v;if(answers[id]===j)b.classList.add('selected');if(graded[id]&&j===q[3])b.classList.add('correct');else if(graded[id]&&answers[id]===j)b.classList.add('wrong');b.disabled=!!graded[id];b.onclick=()=>{answers[id]=j;render()};opts.appendChild(b)});
+let fb=document.getElementById('feedback');fb.classList.toggle('hidden',!graded[id]);if(graded[id])fb.innerHTML=answers[id]===q[3]?'🎉 <strong>Correct! Great job!</strong> You earned 1 point.':'💛 <strong>Not quite!</strong> The correct answer is: <strong>'+q[2][q[3]]+'</strong>. Keep going!';
+document.getElementById('check').classList.toggle('hidden',!!graded[id]);document.getElementById('next').classList.toggle('hidden',!graded[id]);document.getElementById('next').textContent=pos===qs.length-1?'See My Result 🏆':'Next Question →';document.getElementById('prev').disabled=pos===0;
+}
+function checkAnswer(){let id=order[pos];if(answers[id]===undefined)return;graded[id]=true;render()}
+function move(d){if(d===1&&pos===qs.length-1){showResult();return}pos=Math.max(0,Math.min(qs.length-1,pos+d));render()}
+function showResult(){document.getElementById('quiz').classList.add('hidden');document.getElementById('result').classList.remove('hidden');let score=order.reduce((s,id)=>s+(graded[id]&&answers[id]===qs[id][3]?1:0),0);document.getElementById('finalScore').textContent=score+' / '+qs.length;document.getElementById('percent').textContent=Math.round(score/qs.length*100)+'% · Correct answers: '+score;document.getElementById('message').textContent=score>=36?'Amazing! You are an English superstar! 🌟':score>=30?'Excellent work! Keep shining! ⭐':score>=24?'Good job! A little more practice will help! 💪':'Keep trying, Hana! Practice makes progress! ❤️'}
+function restart(){document.getElementById('result').classList.add('hidden');document.getElementById('intro').classList.remove('hidden')}
+function copyResult(){let score=order.reduce((s,id)=>s+(graded[id]&&answers[id]===qs[id][3]?1:0),0);let txt=`Hana Mohamed Sobhy\nClass: Ocean\nGrade: 2\nSchool: Sunrise Language School\nEnglish Challenge Result: ${score}/${qs.length} (${Math.round(score/qs.length*100)}%)`;if(navigator.clipboard)navigator.clipboard.writeText(txt).then(()=>alert('Result copied!'));else alert(txt)}
+</script>
+</body></html>
